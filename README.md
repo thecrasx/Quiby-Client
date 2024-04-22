@@ -1,1 +1,1 @@
-Server for Quiby Chat Application
+Client for Quiby Chat Application
