@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QWidget, QFrame
+from PySide6.QtWidgets import QWidget, QFrame, QSizePolicy
 from PySide6.QtCore import Qt, QPoint
-from PySide6.QtGui import QPainterPath, QPaintEvent, QPainter, QPen, QBrush, QImage
+from PySide6.QtGui import QPainterPath, QPaintEvent, QPainter, QPen, QBrush, QImage, QResizeEvent
 
 from PIL import Image
 
@@ -8,14 +8,26 @@ from PIL import Image
 
 
 class UserImage(QFrame):
-    def __init__(self, path: str, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None, path: str = ""):
         super().__init__(parent)
         self.show()
 
         self.__imgWidth = 0
         self.__image = None
         self.__path = path
-        self.setImage(path)
+        if path != "":
+            self.setImage(path)
+
+        sp = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sp.setHeightForWidth(True)
+        self.setSizePolicy(sp)
+
+
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+
+        self.cropImageFromCenter(self.height() * 0.5)
 
 
     def setImage(self, path: str):
@@ -53,6 +65,9 @@ class UserImage(QFrame):
 
 
     def paintEvent(self, event: QPaintEvent):
+        super().paintEvent(event)
+        if self.__image is None:
+            return
         painter = QPainter(self)
         painter.setBackgroundMode(Qt.BGMode.TransparentMode)
         painter.setRenderHint(QPainter.Antialiasing, True)
